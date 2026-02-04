@@ -5,11 +5,15 @@ import { field, children, relation } from '@nozbe/watermelondb/decorators'
 export default class Student extends Model {
   static table = 'students'
 
+  static associations = {
+    attendances: { type: 'has_many', foreignKey: 'student_id' },
+    classes: { type: 'belongs_to', key: 'class_id' }
+  }
+
   @field('name') name
   @field('parent_phone') parentPhone
-  
-  // O aluno pertence a uma turma
-  @relation('classes', 'class_id') class
 
+  // Relacionamentos
+  @relation('classes', 'class_id') class
   @children('attendances') attendances
 }
