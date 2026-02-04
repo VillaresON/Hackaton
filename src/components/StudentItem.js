@@ -1,34 +1,47 @@
 // src/components/StudentItem.js
-import React, { useState } from 'react'; // Importamos useState
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Vibration } from 'react-native'; // Adicionei Vibration
 import { withObservables } from '@nozbe/watermelondb/react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { database } from '../database';
 import { Q } from '@nozbe/watermelondb';
-import { toggleAttendance, removeAttendanceRecord } from '../services/AttendanceService';
-import ConfirmModal from './ConfirmModal'; // Importamos nosso novo modal
+import { markPresent, markAbsent, removeAttendanceRecord } from '../services/AttendanceService';
+import ConfirmModal from './ConfirmModal';
 
 const StudentItem = ({ student, attendances, onOpenProfile }) => {
   const attendance = attendances[0];
   const [isModalVisible, setModalVisible] = useState(false);
 
   const getStatusColor = () => {
-    if (!attendance) return '#bdbdbd';
-    return attendance.present ? '#4CAF50' : '#F44336';
+    if (!attendance) return '#bdbdbd'; // Cinza
+    return attendance.present ? '#4CAF50' : '#F44336'; // Verde ou Vermelho
   };
 
+  // TOQUE RÁPIDO -> Marca Presente (Verde)
   const handlePress = () => {
-    // Se já está presente (Verde), abrimos o modal
-    if (attendance && attendance.present) {
+    if (attendance) {
+      // Se já tem registro (Seja verde ou vermelho), pergunta se quer remover
       setModalVisible(true);
     } else {
-      toggleAttendance(student);
+      markPresent(student);
+    }
+  };
+
+  // SEGURAR O DEDO -> Marca Falta (Vermelho)
+  const handleLongPress = () => {
+    // Vibra o celular para dar feedback tátil (Sensação premium)
+    Vibration.vibrate(50);
+    
+    if (attendance) {
+      setModalVisible(true);
+    } else {
+      markAbsent(student);
     }
   };
 
   const confirmRemoval = () => {
     removeAttendanceRecord(attendance);
-    setModalVisible(false); // Fecha o modal após remover
+    setModalVisible(false);
   };
 
   return (
@@ -37,6 +50,8 @@ const StudentItem = ({ student, attendances, onOpenProfile }) => {
         <TouchableOpacity 
           style={styles.mainAction} 
           onPress={handlePress}
+          onLongPress={handleLongPress} // <--- A Mágica aqui
+          delayLongPress={400} // Tempo em ms para considerar "longo"
           activeOpacity={0.7}
         >
           <View style={[styles.avatar, { backgroundColor: getStatusColor() }]}>
@@ -47,7 +62,7 @@ const StudentItem = ({ student, attendances, onOpenProfile }) => {
             <Text style={styles.status}>
               {attendance 
                 ? (attendance.present ? 'Presente' : 'Faltou') 
-                : 'Toque para marcar'}
+                : 'Toque: Presente | Segure: Falta'}
             </Text>
           </View>
         </TouchableOpacity>
@@ -61,11 +76,10 @@ const StudentItem = ({ student, attendances, onOpenProfile }) => {
         </TouchableOpacity>
       </View>
 
-      {/* MODAL PROFISSIONAL AQUI */}
       <ConfirmModal
         isVisible={isModalVisible}
-        title="Remover Presença?"
-        message={`Deseja retirar a presença de ${student.name}? O status voltará para "Não marcado".`}
+        title="Remover Registro?"
+        message={`Deseja limpar o status de ${student.name}?`}
         onClose={() => setModalVisible(false)}
         onConfirm={confirmRemoval}
       />
