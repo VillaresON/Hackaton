@@ -1,13 +1,15 @@
+// src/database/model/Student.js
 import { Model } from '@nozbe/watermelondb'
-import { field, children } from '@nozbe/watermelondb/decorators'
+import { field, children, relation } from '@nozbe/watermelondb/decorators'
 
 export default class Student extends Model {
-    static table = 'students'
+  static table = 'students'
 
-    // Mapeia as colunas do banco para propriedades da classe
-    @field('name') name
-    @field('parent_phone') parentPhone
+  @field('name') name
+  @field('parent_phone') parentPhone
+  
+  // O aluno pertence a uma turma
+  @relation('classes', 'class_id') class
 
-    // Relacionamento: Um aluno tem muitas chamadas
-    @children('attendances') attendances
+  @children('attendances') attendances
 }
