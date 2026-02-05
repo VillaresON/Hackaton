@@ -1,46 +1,56 @@
 // src/screens/ClassScreen.js
 import React from 'react';
-import { View, FlatList, StyleSheet, Text } from 'react-native';
+// CORREÇÃO AQUI: Adicionei TouchableOpacity na lista de imports
+import { View, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native'; 
 import { withObservables } from '@nozbe/watermelondb/react';
 import { Q } from '@nozbe/watermelondb';
-import { MaterialIcons } from '@expo/vector-icons'; // Importamos os ícones
+import { MaterialIcons } from '@expo/vector-icons';
 import { database } from '../database';
 import StudentItem from '../components/StudentItem';
 
-const ClassScreen = ({ students, navigation }) => {
+const ClassScreen = ({ students, navigation, route }) => {
   
   const handleOpenProfile = (student) => {
     navigation.navigate('StudentProfile', { student });
   };
 
+  const handleOpenGrades = () => {
+    navigation.navigate('Grades', { 
+      classId: route.params.classId, 
+      className: route.params.className 
+    });
+  };
+
   return (
     <View style={styles.container}>
       
-      {/* --- BARRA DE LEGENDA (NOVA) --- */}
+      {/* --- BARRA DE LEGENDA --- */}
       <View style={styles.legendContainer}>
         <Text style={styles.legendTitle}>Instruções de Chamada:</Text>
         
         <View style={styles.legendRow}>
-          {/* Instrução de Presença */}
           <View style={styles.legendItem}>
             <View style={[styles.dot, { backgroundColor: '#4CAF50' }]} />
             <Text style={styles.legendText}>Toque: <Text style={{fontWeight: 'bold'}}>Presente</Text></Text>
           </View>
 
-          {/* Instrução de Falta */}
           <View style={styles.legendItem}>
             <View style={[styles.dot, { backgroundColor: '#F44336' }]} />
             <Text style={styles.legendText}>Segure: <Text style={{fontWeight: 'bold'}}>Falta</Text></Text>
           </View>
         </View>
 
-        {/* Instrução do Perfil */}
         <View style={styles.legendRowSecondary}>
           <MaterialIcons name="info-outline" size={16} color="#6200ee" />
           <Text style={styles.legendSubText}> Clique no ícone (i) para ver detalhes</Text>
         </View>
       </View>
-      {/* ------------------------------- */}
+
+      {/* --- BOTÃO DE LANÇAR NOTAS (NOVO) --- */}
+      <TouchableOpacity style={styles.gradeButton} onPress={handleOpenGrades}>
+        <MaterialIcons name="assignment-turned-in" size={24} color="#fff" />
+        <Text style={styles.gradeButtonText}>LANÇAR NOTAS / AVALIAÇÃO</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={students}
@@ -66,7 +76,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
-    elevation: 2, // Sombra leve
+    elevation: 2,
     marginBottom: 5,
   },
   legendTitle: {
@@ -78,7 +88,7 @@ const styles = StyleSheet.create({
   },
   legendRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around', // Espalha os itens
+    justifyContent: 'space-around',
     marginBottom: 10,
   },
   legendItem: {
@@ -97,20 +107,28 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 8,
   },
-  legendText: {
-    fontSize: 13,
-    color: '#333',
-  },
-  legendRowSecondary: {
+  legendText: { fontSize: 13, color: '#333' },
+  legendRowSecondary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 5 },
+  legendSubText: { fontSize: 12, color: '#666', fontStyle: 'italic' },
+
+  // Estilo do Botão de Notas
+  gradeButton: {
     flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: '#FF9800', // Laranja
+    marginHorizontal: 15,
+    marginTop: 10,
+    marginBottom: 5,
+    padding: 12,
+    borderRadius: 8,
     justifyContent: 'center',
-    marginTop: 5,
+    alignItems: 'center',
+    elevation: 3
   },
-  legendSubText: {
-    fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic'
+  gradeButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    fontSize: 14
   }
 });
 

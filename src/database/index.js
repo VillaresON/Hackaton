@@ -1,27 +1,27 @@
+// src/database/index.js
 import { Database } from '@nozbe/watermelondb'
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite'
 
-import schema from './schema'
+// O IMPORT ABAIXO É O MAIS IMPORTANTE:
+import { mySchema } from './schema' 
+
 import Student from './model/Student'
-import Attendance from './model/Attendance'
 import Class from './model/Class'
+import Attendance from './model/Attendance'
+import Grade from './model/Grade' // Certifique-se de que criou este arquivo
 
-//Criamos o adaptador (a ponte entre o JS e o SQLite nativo)
 const adapter = new SQLiteAdapter({
-  schema,
-  jsi: true,
-
-  onSetUpError: error => {
-    console.error('Erro ao carregar banco de dados:', error)
-  }
+  schema: mySchema, // Se mySchema for undefined, o app quebra aqui
+  jsi: true, 
+  onSetUpError: error => console.log(error)
 })
 
-// 2. Instanciamos o Banco de Dados
 export const database = new Database({
   adapter,
   modelClasses: [
-    Class,
     Student,
+    Class,
     Attendance,
+    Grade
   ],
 })
