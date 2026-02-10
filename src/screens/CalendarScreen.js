@@ -20,10 +20,13 @@ LocaleConfig.defaultLocale = 'pt-br';
 const CalendarScreen = () => {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [tasks, setTasks] = useState([]);
-    const [markedDates, setMarkedDates] = useState({});
+
+    // Guardamos quais dias têm tarefas (true/false)
+    const [taskDays, setTaskDays] = useState({});
+
     const [classes, setClasses] = useState([]);
 
-    // States do Modal de Criação
+    // States do Modal
     const [isModalVisible, setModalVisible] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskDesc, setNewTaskDesc] = useState('');
@@ -31,7 +34,7 @@ const CalendarScreen = () => {
 
     useEffect(() => {
         loadClasses();
-        loadAllTasks(); // Para marcar as bolinhas no calendário
+        loadAllTasks();
     }, []);
 
     useEffect(() => {
@@ -43,32 +46,24 @@ const CalendarScreen = () => {
         setClasses(list);
     };
 
-    // Carrega TODAS as tarefas apenas para saber onde por a bolinha no calendário
+    // Mapeia quais dias possuem tarefas para pintar o ícone
     const loadAllTasks = async () => {
         const all = await database.get('tasks').query().fetch();
-        const marks = {};
+        const map = {};
 
         all.forEach(t => {
-            marks[t.date] = { marked: true, dotColor: '#6200ee' };
+            // Se tem tarefa nesse dia, marca como true
+            map[t.date] = true;
         });
 
-        // Marca o dia selecionado com um círculo roxo
-        marks[selectedDate] = {
-            ...(marks[selectedDate] || {}),
-            selected: true,
-            selectedColor: '#6200ee'
-        };
-
-        setMarkedDates(marks);
+        setTaskDays(map);
     };
 
-    // Carrega tarefas do dia específico com os dados da Turma
     const loadTasksForDay = async (date) => {
         const dayTasks = await database.get('tasks').query(
             Q.where('date', date)
         ).fetch();
 
-        // Precisamos pegar o nome da turma de cada tarefa
         const enrichedTasks = await Promise.all(dayTasks.map(async (task) => {
             const classObj = await task.classInfo.fetch();
             return {
@@ -78,21 +73,11 @@ const CalendarScreen = () => {
                 isDone: task.isDone,
                 className: classObj ? classObj.name : 'Geral',
                 classGrade: classObj ? classObj.grade : '',
-                raw: task // Guarda o objeto original para updates
+                raw: task
             };
         }));
 
         setTasks(enrichedTasks);
-    };
-
-    const handleDayPress = (day) => {
-        setSelectedDate(day.dateString);
-        // Atualiza visual do calendário
-        setMarkedDates(prev => ({
-            ...prev,
-            [selectedDate]: { ...prev[selectedDate], selected: false }, // Desmarca anterior
-            [day.dateString]: { ...prev[day.dateString], selected: true, selectedColor: '#6200ee' } // Marca novo
-        }));
     };
 
     const handleSaveTask = async () => {
@@ -114,8 +99,8 @@ const CalendarScreen = () => {
 
         setModalVisible(false);
         setNewTaskTitle(''); setNewTaskDesc(''); setSelectedClassId(null);
-        loadAllTasks(); // Atualiza bolinhas
-        loadTasksForDay(selectedDate); // Atualiza lista
+        loadAllTasks();
+        loadTasksForDay(selectedDate);
     };
 
     const toggleTaskDone = async (taskItem) => {
@@ -142,27 +127,62 @@ const CalendarScreen = () => {
         ]);
     };
 
+    // --- COMPONENTE PERSONALIZADO DO DIA (AQUI ESTÁ O ÍCONE) ---
+    const CustomDay = ({ date, state }) => {
+        const isSelected = date.dateString === selectedDate;
+        const hasTask = taskDays[date.dateString]; // Verifica se tem tarefa no mapa
+        const isToday = state === 'today';
+        const isDisabled = state === 'disabled';
+
+        return (
+            <TouchableOpacity
+                onPress={() => !isDisabled && setSelectedDate(date.dateString)}
+                style={[
+                    styles.dayContainer,
+                    isSelected && styles.daySelected // Fundo Roxo se selecionado
+                ]}
+            >
+                <Text style={[
+                    styles.dayText,
+                    isSelected && styles.dayTextSelected,
+                    isToday && !isSelected && styles.dayTextToday,
+                    isDisabled && styles.dayTextDisabled
+                ]}>
+                    {date.day}
+                </Text>
+
+                {/* ÍCONE DE TAREFA (O SUBSTITUTO DO PONTINHO) */}
+                {hasTask && (
+                    <View style={styles.markerIcon}>
+                        {/* Se estiver selecionado, ícone branco, senão laranja */}
+                        <MaterialIcons
+                            name="assignment"
+                            size={14}
+                            color={isSelected ? "#fff" : "#FF9800"}
+                        />
+                    </View>
+                )}
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <View style={styles.container}>
 
-            {/* 1. O CALENDÁRIO */}
             <Calendar
                 current={selectedDate}
-                onDayPress={handleDayPress}
-                markedDates={markedDates}
+                // Substitui o renderizador padrão pelo nosso CustomDay
+                dayComponent={({ date, state }) => <CustomDay date={date} state={state} />}
+
                 theme={{
-                    selectedDayBackgroundColor: '#6200ee',
-                    todayTextColor: '#6200ee',
                     arrowColor: '#6200ee',
-                    textDayFontWeight: 'bold',
                     textMonthFontWeight: 'bold',
                     textDayHeaderFontWeight: 'bold',
                 }}
             />
 
-            {/* 2. LISTA DE TAREFAS (CARDS) */}
             <View style={styles.listContainer}>
-                <Text style={styles.listHeader}>Agendamentos para o dia {new Date(selectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</Text>
+                <Text style={styles.listHeader}>Agenda de {new Date(selectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</Text>
 
                 <FlatList
                     data={tasks}
@@ -170,8 +190,8 @@ const CalendarScreen = () => {
                     contentContainerStyle={{ paddingBottom: 80 }}
                     ListEmptyComponent={
                         <View style={styles.emptyState}>
-                            <MaterialIcons name="event-busy" size={40} color="#ccc" />
-                            <Text style={{ color: '#999', marginTop: 10 }}>Nada agendado para hoje.</Text>
+                            <MaterialIcons name="event-available" size={50} color="#e0e0e0" />
+                            <Text style={{ color: '#999', marginTop: 10 }}>Dia livre! Nenhuma tarefa agendada.</Text>
                         </View>
                     }
                     renderItem={({ item }) => (
@@ -200,12 +220,11 @@ const CalendarScreen = () => {
                 />
             </View>
 
-            {/* FAB (Botão Flutuante) */}
             <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
                 <MaterialIcons name="add" size={30} color="#fff" />
             </TouchableOpacity>
 
-            {/* 3. MODAL DE CRIAÇÃO */}
+            {/* MODAL */}
             <Modal
                 isVisible={isModalVisible}
                 onBackdropPress={() => setModalVisible(false)}
@@ -258,46 +277,50 @@ const CalendarScreen = () => {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f8f9fa' },
 
-    listContainer: { flex: 1, padding: 15 },
-    listHeader: { fontSize: 16, fontWeight: 'bold', color: '#FFF', marginBottom: 10, textTransform: 'uppercase', backgroundColor: '#6200ee', borderRadius: 8, textAlign: 'center' },
-
-    // Card Style (Trello Like)
-    card: {
-        flexDirection: 'row', backgroundColor: '#fff', borderRadius: 8, marginBottom: 10, elevation: 2, overflow: 'hidden'
+    // --- ESTILOS DO DIA PERSONALIZADO ---
+    dayContainer: {
+        width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 16
     },
+    daySelected: { backgroundColor: '#6200ee' }, // Fundo Roxo quando selecionado
+
+    dayText: { color: '#333', fontWeight: '500' },
+    dayTextSelected: { color: '#fff', fontWeight: 'bold' },
+    dayTextToday: { color: '#6200ee', fontWeight: 'bold' },
+    dayTextDisabled: { color: '#d9e1e8' },
+
+    markerIcon: {
+        position: 'absolute',
+        bottom: -8, // Joga o ícone um pouco pra baixo do número
+    },
+    // ------------------------------------
+
+    listContainer: { flex: 1, padding: 15 },
+    listHeader: { fontSize: 16, fontWeight: 'bold', color: '#666', marginBottom: 10, textTransform: 'uppercase' },
+
+    card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 8, marginBottom: 10, elevation: 2, overflow: 'hidden' },
     cardDone: { opacity: 0.6, backgroundColor: '#f0f0f0' },
-    cardLeftBorder: { width: 5, backgroundColor: '#6200ee' },
+    cardLeftBorder: { width: 5, backgroundColor: '#FF9800' }, // Laranja combina com tarefas
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 },
 
-    badge: { backgroundColor: '#ede7f6', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
-    badgeText: { color: '#6200ee', fontSize: 10, fontWeight: 'bold' },
+    badge: { backgroundColor: '#fff3e0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
+    badgeText: { color: '#ef6c00', fontSize: 14, fontWeight: 'bold' },
 
     cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#333' },
     textDone: { textDecorationLine: 'line-through', color: '#888' },
     cardDesc: { fontSize: 13, color: '#666', marginTop: 4 },
-
     checkButton: { justifyContent: 'center', paddingHorizontal: 15, borderLeftWidth: 1, borderLeftColor: '#eee' },
-
     emptyState: { alignItems: 'center', marginTop: 40 },
 
-    // FAB
-    fab: {
-        position: 'absolute', bottom: 20, right: 20, width: 60, height: 60,
-        borderRadius: 30, backgroundColor: '#6200ee',
-        justifyContent: 'center', alignItems: 'center', elevation: 5
-    },
+    fab: { position: 'absolute', bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: '#6200ee', justifyContent: 'center', alignItems: 'center', elevation: 5 },
 
-    // Modal
     modalContent: { backgroundColor: '#fff', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
     modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#333' },
     modalSub: { fontSize: 14, color: '#666', marginBottom: 20 },
     input: { backgroundColor: '#f5f5f5', padding: 12, borderRadius: 8, marginBottom: 15, fontSize: 16 },
-
     label: { fontWeight: 'bold', color: '#666', marginBottom: 10 },
     classChip: { padding: 10, backgroundColor: '#eee', borderRadius: 20, marginRight: 10 },
     classChipSelected: { backgroundColor: '#6200ee' },
     classChipText: { fontWeight: 'bold', color: '#555' },
-
     saveButton: { backgroundColor: '#6200ee', padding: 15, borderRadius: 10, alignItems: 'center' },
     saveButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
 });

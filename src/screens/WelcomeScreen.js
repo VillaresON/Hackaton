@@ -61,11 +61,15 @@ const WelcomeScreen = ({ navigation }) => {
         >
             <View style={styles.content}>
 
-                {/* Cabeçalho */}
+                {/* Cabeçalho Atualizado */}
                 <View style={styles.header}>
                     <View style={styles.logoCircle}>
+                        {/* Aqui você pode trocar o ícone por uma imagem sua depois */}
+                        {/* <Image source={require('../../assets/icon.png')} style={{width: 60, height: 60}} /> */}
                         <MaterialIcons name="school" size={50} color="#6200ee" />
                     </View>
+
+                    <Text style={styles.appName}>EduFlow</Text> {/* NOVO NOME */}
                     <Text style={styles.welcomeText}>Bem-vindo(a)!</Text>
                     <Text style={styles.subText}>Vamos configurar seu perfil de educador.</Text>
                 </View>
@@ -165,7 +169,16 @@ const styles = StyleSheet.create({
         paddingVertical: 15, paddingHorizontal: 30, borderRadius: 30,
         alignItems: 'center', elevation: 5, marginTop: 10
     },
-    buttonText: { color: '#6200ee', fontWeight: 'bold', fontSize: 18, marginRight: 10 }
+    buttonText: { color: '#6200ee', fontWeight: 'bold', fontSize: 18, marginRight: 10 },
+    appName: {
+        fontSize: 36,
+        fontWeight: 'bold',
+        color: '#fff',
+        letterSpacing: 1,
+        marginBottom: 5
+    },
+
+    welcomeText: { fontSize: 22, fontWeight: '600', color: '#e0e0e0', textAlign: 'center' },
 });
 
 export default WelcomeScreen;

@@ -31,7 +31,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
 
                 {/* Telas Principais */}
-                <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Diário Offline' }} />
+                <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'EduFlow' }} />
                 <Stack.Screen name="ClassDetails" component={ClassScreen} options={({ route }) => ({ title: route.params.className })} />
                 <Stack.Screen name="StudentProfile" component={StudentProfileScreen} options={{ title: 'Perfil do Aluno' }} />
                 <Stack.Screen name="Admin" component={AdminScreen} options={{ title: 'Gestão Escolar' }} />

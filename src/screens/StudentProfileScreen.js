@@ -1,32 +1,78 @@
 // src/screens/StudentProfileScreen.js
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, ScrollView, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, ScrollView, Dimensions, Alert } from 'react-native';
 import { withObservables } from '@nozbe/watermelondb/react';
 import { MaterialIcons } from '@expo/vector-icons';
-import { PieChart } from 'react-native-chart-kit'; // Gráfico
+import { PieChart } from 'react-native-chart-kit'; 
+import AsyncStorage from '@react-native-async-storage/async-storage'; // <--- Importante para ler o nome
 
 const screenWidth = Dimensions.get('window').width;
 
 const StudentProfileScreen = ({ student, allAttendances }) => {
   
-  // 1. Calcula Estatísticas
+  // State para guardar o nome do professor(a)
+  const [teacherIdentity, setTeacherIdentity] = useState('Professor(a)');
+
+  // --- 1. Carregar Nome do Professor ---
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const json = await AsyncStorage.getItem('user_profile');
+        if (json) {
+          const user = JSON.parse(json);
+          const title = user.gender === 'F' ? 'Professora' : 'Professor';
+          // Ex: "Professora Maria"
+          setTeacherIdentity(`${title} ${user.name}`);
+        }
+      } catch (e) {
+        console.log("Erro ao carregar perfil do professor");
+      }
+    };
+    loadProfile();
+  }, []);
+
+  // --- 2. Calcula Estatísticas ---
   const total = allAttendances.length;
   const presents = allAttendances.filter(a => a.present).length;
   const absences = total - presents;
   const percentage = total > 0 ? ((presents / total) * 100).toFixed(1) : 0;
 
-  // 2. Dados para o Gráfico
+  // --- 3. Dados para o Gráfico ---
   const chartData = [
     { name: 'Presenças', population: presents, color: '#4CAF50', legendFontColor: '#7F7F7F', legendFontSize: 12 },
     { name: 'Faltas', population: absences, color: '#F44336', legendFontColor: '#7F7F7F', legendFontSize: 12 },
   ];
 
-  // 3. Função do WhatsApp
-  const handleWhatsApp = () => {
-    const message = `Olá! Sou professor(a) do *${student.name}*. Notei que ele faltou hoje. Gostaria de confirmar se está tudo bem?`;
-    // Remove caracteres não numéricos do telefone
-    const phone = student.parentPhone.replace(/\D/g, ''); 
-    Linking.openURL(`whatsapp://send?phone=${phone}&text=${message}`);
+  // --- 4. Função do WhatsApp Personalizada ---
+  const handleWhatsApp = async () => {
+    if (!student.parentPhone) {
+        Alert.alert("Erro", "Nenhum telefone cadastrado para este aluno.");
+        return;
+    }
+
+    // MENSAGEM COM O NOME DO PROFESSOR(A)
+    const message = `Olá! Sou *${teacherIdentity}*, docente do aluno *${student.name}*. Gostaria de falar sobre o desempenho escolar.`;
+    
+    // Tratamento do Telefone
+    let phone = student.parentPhone.replace(/\D/g, ''); 
+
+    // Adiciona código do Brasil se necessário
+    if (phone.length >= 10 && phone.length <= 11) {
+        phone = '55' + phone;
+    }
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    try {
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+            await Linking.openURL(url);
+        } else {
+            Alert.alert("Erro", "O WhatsApp não está instalado ou o link falhou.");
+        }
+    } catch (err) {
+        Alert.alert("Erro", "Não foi possível abrir o WhatsApp.");
+    }
   };
 
   return (
@@ -34,10 +80,10 @@ const StudentProfileScreen = ({ student, allAttendances }) => {
       {/* Cabeçalho do Aluno */}
       <View style={styles.header}>
         <View style={styles.avatarLarge}>
-          <Text style={styles.avatarTextLarge}>{student.name.charAt(0)}</Text>
+          <Text style={styles.avatarTextLarge}>{student.name ? student.name.charAt(0) : '?'}</Text>
         </View>
         <Text style={styles.studentName}>{student.name}</Text>
-        <Text style={styles.studentClass}>Frequência: {percentage}%</Text>
+        <Text style={styles.studentClass}>Frequência Global: {percentage}%</Text>
       </View>
 
       {/* Gráfico de Frequência */}
@@ -57,7 +103,7 @@ const StudentProfileScreen = ({ student, allAttendances }) => {
             absolute
           />
         ) : (
-          <Text style={{textAlign: 'center', padding: 20, color: '#999'}}>Sem dados suficientes ainda.</Text>
+          <Text style={{textAlign: 'center', padding: 20, color: '#999'}}>Sem dados de chamada suficientes ainda.</Text>
         )}
       </View>
 
@@ -68,7 +114,7 @@ const StudentProfileScreen = ({ student, allAttendances }) => {
       </TouchableOpacity>
       
       <Text style={styles.disclaimer}>
-        Isso abrirá o WhatsApp com uma mensagem pré-definida para o número: {student.parentPhone}
+        Mensagem será enviada por: {teacherIdentity}
       </Text>
 
     </ScrollView>
@@ -92,7 +138,6 @@ const styles = StyleSheet.create({
   disclaimer: { textAlign: 'center', color: '#999', fontSize: 12, paddingHorizontal: 40, marginBottom: 20 }
 });
 
-// Busca TODAS as presenças desse aluno (Histórico)
 const enhance = withObservables(['route'], ({ route }) => ({
   student: route.params.student,
   allAttendances: route.params.student.attendances.observe()
