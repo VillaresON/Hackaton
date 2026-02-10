@@ -2,7 +2,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 2, // Se você já rodou o app antes, vai precisar desinstalar e instalar de novo
+  version: 4, // Atualizei a versão para refletir a remoção da tabela
   tables: [
     tableSchema({
       name: 'students',

@@ -3,7 +3,7 @@ import { Database } from '@nozbe/watermelondb'
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite'
 
 // O IMPORT ABAIXO É O MAIS IMPORTANTE:
-import { mySchema } from './schema' 
+import { mySchema } from './schema'
 
 import Student from './model/Student'
 import Class from './model/Class'
@@ -12,7 +12,7 @@ import Grade from './model/Grade' // Certifique-se de que criou este arquivo
 
 const adapter = new SQLiteAdapter({
   schema: mySchema, // Se mySchema for undefined, o app quebra aqui
-  jsi: true, 
+  jsi: true,
   onSetUpError: error => console.log(error)
 })
 

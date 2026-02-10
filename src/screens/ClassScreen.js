@@ -1,7 +1,7 @@
 // src/screens/ClassScreen.js
 import React from 'react';
 // CORREÇÃO AQUI: Adicionei TouchableOpacity na lista de imports
-import { View, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native'; 
+import { View, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { withObservables } from '@nozbe/watermelondb/react';
 import { Q } from '@nozbe/watermelondb';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -9,25 +9,25 @@ import { database } from '../database';
 import StudentItem from '../components/StudentItem';
 
 const ClassScreen = ({ students, navigation, route }) => {
-  
+
   const handleOpenProfile = (student) => {
     navigation.navigate('StudentProfile', { student });
   };
 
   const handleOpenGrades = () => {
-    navigation.navigate('Grades', { 
-      classId: route.params.classId, 
-      className: route.params.className 
+    navigation.navigate('Grades', {
+      classId: route.params.classId,
+      className: route.params.className
     });
   };
 
   return (
     <View style={styles.container}>
-      
+
       {/* --- BARRA DE LEGENDA --- */}
       <View style={styles.legendContainer}>
         <Text style={styles.legendTitle}>Instruções de Chamada:</Text>
-        
+
         <View style={styles.legendRow}>
           <View style={styles.legendItem}>
             <View style={[styles.dot, { backgroundColor: '#4CAF50' }]} />
@@ -46,19 +46,21 @@ const ClassScreen = ({ students, navigation, route }) => {
         </View>
       </View>
 
-      {/* --- BOTÃO DE LANÇAR NOTAS (NOVO) --- */}
-      <TouchableOpacity style={styles.gradeButton} onPress={handleOpenGrades}>
-        <MaterialIcons name="assignment-turned-in" size={24} color="#fff" />
-        <Text style={styles.gradeButtonText}>LANÇAR NOTAS / AVALIAÇÃO</Text>
-      </TouchableOpacity>
+      {/* --- BOTÕES DE AÇÕES (NOVOS) --- */}
+      <View style={styles.actionButtonsContainer}>
+        <TouchableOpacity style={styles.gradeButton} onPress={handleOpenGrades}>
+          <MaterialIcons name="assignment-turned-in" size={24} color="#fff" />
+          <Text style={styles.gradeButtonText}>LANÇAR NOTAS</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={students}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <StudentItem 
-            student={item} 
-            onOpenProfile={() => handleOpenProfile(item)} 
+          <StudentItem
+            student={item}
+            onOpenProfile={() => handleOpenProfile(item)}
           />
         )}
         contentContainerStyle={{ paddingBottom: 20 }}
@@ -69,7 +71,7 @@ const ClassScreen = ({ students, navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
-  
+
   // Estilos da Legenda
   legendContainer: {
     backgroundColor: '#fff',
@@ -129,6 +131,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
     fontSize: 14
+  },
+
+  // Container para botões de ações
+  actionButtonsContainer: {
+    marginHorizontal: 15,
+    marginTop: 10,
+    marginBottom: 5,
   }
 });
 
