@@ -21,7 +21,6 @@ const WelcomeScreen = ({ navigation }) => {
 
     // Passo 1: Selecionar Sexo
     const handleSelectGender = (selected) => {
-        // Animação suave para a próxima tela
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setGender(selected);
         setStep(2);
@@ -37,14 +36,12 @@ const WelcomeScreen = ({ navigation }) => {
         try {
             const userProfile = {
                 name: name.trim(),
-                gender: gender, // 'M' ou 'F'
+                gender: gender,
                 isSetup: true
             };
 
-            // Salva no celular pra sempre
             await AsyncStorage.setItem('user_profile', JSON.stringify(userProfile));
 
-            // Reseta a navegação e vai para a Home (impede voltar para cá)
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'Home' }],
@@ -61,16 +58,14 @@ const WelcomeScreen = ({ navigation }) => {
         >
             <View style={styles.content}>
 
-                {/* Cabeçalho Atualizado */}
+                {/* Cabeçalho */}
                 <View style={styles.header}>
                     <View style={styles.logoCircle}>
-                        {/* Aqui você pode trocar o ícone por uma imagem sua depois */}
-                        {/* <Image source={require('../../assets/icon.png')} style={{width: 60, height: 60}} /> */}
                         <MaterialIcons name="school" size={50} color="#6200ee" />
                     </View>
 
-                    <Text style={styles.appName}>EduFlow</Text> {/* NOVO NOME */}
-                    <Text style={styles.welcomeText}>Bem-vindo(a)!</Text>
+                    <Text style={styles.appName}>EduFlow</Text>
+                    <Text style={styles.welcomeTitle}>Bem-vindo(a)!</Text>
                     <Text style={styles.subText}>Vamos configurar seu perfil de educador.</Text>
                 </View>
 
@@ -120,7 +115,7 @@ const WelcomeScreen = ({ navigation }) => {
                         </TouchableOpacity>
 
                         <TouchableOpacity onPress={() => setStep(1)} style={{ marginTop: 30 }}>
-                            <Text style={{ color: '#fff9', textDecorationLine: 'underline' }}>Voltar e mudar sexo</Text>
+                            <Text style={{ color: 'rgba(255,255,255,0.7)', textDecorationLine: 'underline' }}>Voltar e mudar sexo</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -136,7 +131,15 @@ const styles = StyleSheet.create({
 
     header: { alignItems: 'center', marginBottom: 40 },
     logoCircle: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', marginBottom: 20, elevation: 10 },
-    welcomeText: { fontSize: 28, fontWeight: 'bold', color: '#fff', textAlign: 'center' },
+    
+    appName: {
+        fontSize: 36,
+        fontWeight: 'bold',
+        color: '#fff',
+        letterSpacing: 1,
+        marginBottom: 5
+    },
+    welcomeTitle: { fontSize: 22, fontWeight: '600', color: '#e0e0e0', textAlign: 'center' },
     subText: { fontSize: 16, color: '#e0e0e0', marginTop: 5, textAlign: 'center' },
 
     stepContainer: { width: '100%', alignItems: 'center' },
@@ -152,7 +155,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center', alignItems: 'center',
         elevation: 5
     },
-    selectedCard: { backgroundColor: '#3700b3', borderWidth: 2, borderColor: '#fff' }, // Roxo mais escuro quando selecionado
+    selectedCard: { backgroundColor: '#3700b3', borderWidth: 2, borderColor: '#fff' },
     cardText: { fontSize: 18, fontWeight: 'bold', color: '#6200ee', marginTop: 15 },
     selectedText: { color: '#fff' },
 
@@ -170,15 +173,6 @@ const styles = StyleSheet.create({
         alignItems: 'center', elevation: 5, marginTop: 10
     },
     buttonText: { color: '#6200ee', fontWeight: 'bold', fontSize: 18, marginRight: 10 },
-    appName: {
-        fontSize: 36,
-        fontWeight: 'bold',
-        color: '#fff',
-        letterSpacing: 1,
-        marginBottom: 5
-    },
-
-    welcomeText: { fontSize: 22, fontWeight: '600', color: '#e0e0e0', textAlign: 'center' },
 });
 
 export default WelcomeScreen;
