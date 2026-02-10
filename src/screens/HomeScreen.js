@@ -1,11 +1,12 @@
 // src/screens/HomeScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { withObservables } from '@nozbe/watermelondb/react';
-import { MaterialIcons } from '@expo/vector-icons'; 
+import { MaterialIcons } from '@expo/vector-icons';
 import { database } from '../database';
 import { Q } from '@nozbe/watermelondb';
 import { syncData } from '../services/SyncService';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // <--- Importante
 
 const ClassCard = ({ item, onPress }) => (
   <TouchableOpacity style={styles.card} onPress={onPress}>
@@ -22,6 +23,34 @@ const ClassCard = ({ item, onPress }) => (
 
 const HomeScreen = ({ navigation, classes, pendingCount }) => {
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // State para o nome personalizado
+  const [greeting, setGreeting] = useState('Olá, Professor(a)!');
+
+  // --- CARREGAR PERFIL AO INICIAR ---
+  useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const json = await AsyncStorage.getItem('user_profile');
+      if (json) {
+        const user = JSON.parse(json);
+
+        // Lógica: Se 'F', usa "Professora", senão "Professor"
+        const title = user.gender === 'F' ? 'Professora' : 'Professor';
+
+        // Pega apenas o primeiro nome para não ficar gigante
+        const firstName = user.name.split(' ')[0];
+
+        setGreeting(`Olá, ${title} ${firstName}!`);
+      }
+    } catch (e) {
+      console.log("Erro ao carregar perfil");
+    }
+  };
+  // ----------------------------------
 
   const handleSync = async () => {
     if (pendingCount === 0) {
@@ -46,26 +75,26 @@ const HomeScreen = ({ navigation, classes, pendingCount }) => {
     <View style={styles.container}>
       {/* Cabeçalho de Resumo */}
       <View style={styles.summaryContainer}>
-        
-        {/* Linha do Topo: Saudação + Botões de Ação */}
+
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.welcomeText}>Olá, Professor(a)!</Text>
+            {/* AQUI ESTÁ A MÁGICA: NOME PERSONALIZADO */}
+            <Text style={styles.welcomeText}>{greeting}</Text>
             <Text style={styles.dateText}>{new Date().toLocaleDateString('pt-BR')}</Text>
           </View>
-          
+
           <View style={styles.actionsRow}>
-            {/* BOTÃO DE GESTÃO (ADMIN) */}
-            <TouchableOpacity 
-              style={[styles.circleButton, styles.adminButton]} 
+            {/* Botão Admin */}
+            <TouchableOpacity
+              style={[styles.circleButton, styles.adminButton]}
               onPress={() => navigation.navigate('Admin')}
             >
               <MaterialIcons name="settings" size={24} color="#6200ee" />
             </TouchableOpacity>
 
-            {/* BOTÃO DE SYNC */}
-            <TouchableOpacity 
-              style={[styles.circleButton, pendingCount > 0 ? styles.syncPending : styles.syncOk]} 
+            {/* Botão Sync */}
+            <TouchableOpacity
+              style={[styles.circleButton, pendingCount > 0 ? styles.syncPending : styles.syncOk]}
               onPress={handleSync}
               disabled={isSyncing}
             >
@@ -84,8 +113,8 @@ const HomeScreen = ({ navigation, classes, pendingCount }) => {
             </TouchableOpacity>
           </View>
         </View>
-        
-        {/* Cards de Estatística */}
+
+        {/* Stats */}
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
             <Text style={styles.statNumber}>{classes.length}</Text>
@@ -100,18 +129,18 @@ const HomeScreen = ({ navigation, classes, pendingCount }) => {
         </View>
       </View>
 
-      {/* Lista de Turmas */}
+      {/* Lista WatermelonDB */}
       <Text style={styles.sectionTitle}>Minhas Turmas</Text>
       <FlatList
         data={classes}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <ClassCard 
-            item={item} 
-            onPress={() => navigation.navigate('ClassDetails', { 
-              classId: item.id, 
-              className: item.name 
-            })} 
+          <ClassCard
+            item={item}
+            onPress={() => navigation.navigate('ClassDetails', {
+              classId: item.id,
+              className: item.name
+            })}
           />
         )}
         contentContainerStyle={{ padding: 20 }}
@@ -139,10 +168,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  welcomeText: { fontSize: 20, fontWeight: 'bold', color: '#333' },
+  // Ajuste no texto para não quebrar layout se o nome for grande
+  welcomeText: { fontSize: 20, fontWeight: 'bold', color: '#333', maxWidth: 220 },
   dateText: { fontSize: 14, color: '#666' },
-  
-  // Botões Circulares (Padrão)
+
   circleButton: {
     width: 45,
     height: 45,
@@ -150,19 +179,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
-    marginLeft: 10, // Espaço entre os botões
+    marginLeft: 10,
   },
-  
-  // Estilo específico do Botão Admin
   adminButton: {
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#eee'
   },
-  
-  // Estilos do Botão Sync
-  syncOk: { backgroundColor: '#4CAF50' }, // Verde
-  syncPending: { backgroundColor: '#FF9800' }, // Laranja
+  syncOk: { backgroundColor: '#4CAF50' },
+  syncPending: { backgroundColor: '#FF9800' },
   badge: { position: 'absolute', top: -5, right: -5, backgroundColor: 'red', borderRadius: 10, width: 20, height: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#fff' },
   badgeText: { color: 'white', fontSize: 10, fontWeight: 'bold' },
 
@@ -171,8 +196,7 @@ const styles = StyleSheet.create({
   statNumber: { fontSize: 20, fontWeight: 'bold', color: '#6200ee' },
   statLabel: { fontSize: 12, color: '#666' },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginLeft: 20, marginTop: 20, color: '#333' },
-  
-  // Card da Turma
+
   card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 15, borderRadius: 12, marginBottom: 10, elevation: 2 },
   iconContainer: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#f0e6fc', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
   cardInfo: { flex: 1 },
@@ -180,6 +204,7 @@ const styles = StyleSheet.create({
   cardSubtitle: { fontSize: 14, color: '#666' },
 });
 
+// WatermelonDB Connection
 const enhance = withObservables([], () => ({
   classes: database.get('classes').query(),
   pendingCount: database.get('attendances').query(
