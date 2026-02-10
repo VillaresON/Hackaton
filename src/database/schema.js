@@ -2,8 +2,9 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-  version: 4, // Atualizei a versão para refletir a remoção da tabela
+  version: 3, // Subi a versão
   tables: [
+    // ... (suas tabelas antigas: students, classes, attendances, grades) ...
     tableSchema({
       name: 'students',
       columns: [
@@ -28,7 +29,6 @@ export const mySchema = appSchema({
         { name: 'synced', type: 'boolean' },
       ]
     }),
-    // Tabela nova de Notas
     tableSchema({
       name: 'grades',
       columns: [
@@ -36,6 +36,17 @@ export const mySchema = appSchema({
         { name: 'description', type: 'string' },
         { name: 'value', type: 'number' },
         { name: 'date', type: 'number' },
+      ]
+    }),
+    // --- NOVA TABELA DE TAREFAS ---
+    tableSchema({
+      name: 'tasks',
+      columns: [
+        { name: 'title', type: 'string' },
+        { name: 'description', type: 'string' },
+        { name: 'date', type: 'string' }, // Vamos salvar como string 'YYYY-MM-DD' para facilitar o calendário
+        { name: 'class_id', type: 'string', isIndexed: true },
+        { name: 'is_done', type: 'boolean' },
       ]
     }),
   ]

@@ -8,10 +8,11 @@ import { mySchema } from './schema'
 import Student from './model/Student'
 import Class from './model/Class'
 import Attendance from './model/Attendance'
-import Grade from './model/Grade' // Certifique-se de que criou este arquivo
+import Grade from './model/Grade'
+import Task from './model/Task'
 
 const adapter = new SQLiteAdapter({
-  schema: mySchema, // Se mySchema for undefined, o app quebra aqui
+  schema: mySchema, 
   jsi: true,
   onSetUpError: error => console.log(error)
 })
@@ -22,6 +23,7 @@ export const database = new Database({
     Student,
     Class,
     Attendance,
-    Grade
+    Grade,
+    Task
   ],
 })

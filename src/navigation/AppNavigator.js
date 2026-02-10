@@ -11,6 +11,7 @@ import AdminScreen from '../screens/AdminScreen';
 import GradesScreen from '../screens/GradesScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import AuthLoadingScreen from '../screens/AuthLoadingScreen';
+import CalendarScreen from '../screens/CalendarScreen';
 
 const Stack = createStackNavigator();
 
@@ -35,6 +36,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="StudentProfile" component={StudentProfileScreen} options={{ title: 'Perfil do Aluno' }} />
                 <Stack.Screen name="Admin" component={AdminScreen} options={{ title: 'Gestão Escolar' }} />
                 <Stack.Screen name="Grades" component={GradesScreen} options={{ title: 'Diário de Notas' }} />
+                <Stack.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Agendamento Escolar' }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

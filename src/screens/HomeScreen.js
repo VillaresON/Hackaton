@@ -84,6 +84,15 @@ const HomeScreen = ({ navigation, classes, pendingCount }) => {
           </View>
 
           <View style={styles.actionsRow}>
+
+            {/* BOTÃO AGENDA (Novo) */}
+            <TouchableOpacity
+              style={[styles.circleButton, { backgroundColor: '#fff', borderWidth: 1, borderColor: '#eee' }]}
+              onPress={() => navigation.navigate('Calendar')}
+            >
+              <MaterialIcons name="event" size={24} color="#6200ee" />
+            </TouchableOpacity>
+            
             {/* Botão Admin */}
             <TouchableOpacity
               style={[styles.circleButton, styles.adminButton]}
