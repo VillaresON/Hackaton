@@ -1,9 +1,10 @@
 // src/screens/CalendarScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import Modal from 'react-native-modal';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { database } from '../database';
 import { Q } from '@nozbe/watermelondb';
 
@@ -18,6 +19,7 @@ LocaleConfig.locales['pt-br'] = {
 LocaleConfig.defaultLocale = 'pt-br';
 
 const CalendarScreen = () => {
+    const insets = useSafeAreaInsets();
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [tasks, setTasks] = useState([]);
 
@@ -187,7 +189,7 @@ const CalendarScreen = () => {
                 <FlatList
                     data={tasks}
                     keyExtractor={item => item.id}
-                    contentContainerStyle={{ paddingBottom: 80 }}
+                    contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
                     ListEmptyComponent={
                         <View style={styles.emptyState}>
                             <MaterialIcons name="event-available" size={50} color="#e0e0e0" />
@@ -220,7 +222,7 @@ const CalendarScreen = () => {
                 />
             </View>
 
-            <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
+            <TouchableOpacity style={[styles.fab, { bottom: 20 + insets.bottom }]} onPress={() => setModalVisible(true)}>
                 <MaterialIcons name="add" size={30} color="#fff" />
             </TouchableOpacity>
 
@@ -231,46 +233,52 @@ const CalendarScreen = () => {
                 style={{ justifyContent: 'flex-end', margin: 0 }}
                 avoidKeyboard
             >
-                <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Nova Tarefa</Text>
-                    <Text style={styles.modalSub}>Para o dia {new Date(selectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</Text>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1 }}
+                    keyboardVerticalOffset={Platform.OS === 'android' ? insets.bottom + 60 : 0}
+                >
+                    <View style={[styles.modalContent, { paddingBottom: 20 + insets.bottom }]}>
+                        <Text style={styles.modalTitle}>Nova Tarefa</Text>
+                        <Text style={styles.modalSub}>Para o dia {new Date(selectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</Text>
 
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Título (Ex: Prova, Entrega de Trabalho)"
-                        placeholderTextColor="#000"
-                        value={newTaskTitle}
-                        onChangeText={setNewTaskTitle}
-                    />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Título (Ex: Prova, Entrega de Trabalho)"
+                            placeholderTextColor="#999"
+                            value={newTaskTitle}
+                            onChangeText={setNewTaskTitle}
+                        />
 
-                    <TextInput
-                        style={[styles.input, { height: 80 }]}
-                        placeholder="Descrição (Opcional)"
-                        placeholderTextColor="#000"
-                        multiline
-                        value={newTaskDesc}
-                        onChangeText={setNewTaskDesc}
-                    />
+                        <TextInput
+                            style={[styles.input, { height: 80 }]}
+                            placeholder="Descrição (Opcional)"
+                            placeholderTextColor="#999"
+                            multiline
+                            value={newTaskDesc}
+                            onChangeText={setNewTaskDesc}
+                        />
 
-                    <Text style={styles.label}>Para qual turma?</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-                        {classes.map(cls => (
-                            <TouchableOpacity
-                                key={cls.id}
-                                style={[styles.classChip, selectedClassId === cls.id && styles.classChipSelected]}
-                                onPress={() => setSelectedClassId(cls.id)}
-                            >
-                                <Text style={[styles.classChipText, selectedClassId === cls.id && { color: '#fff' }]}>
-                                    {cls.name}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
+                        <Text style={styles.label}>Para qual turma?</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+                            {classes.map(cls => (
+                                <TouchableOpacity
+                                    key={cls.id}
+                                    style={[styles.classChip, selectedClassId === cls.id && styles.classChipSelected]}
+                                    onPress={() => setSelectedClassId(cls.id)}
+                                >
+                                    <Text style={[styles.classChipText, selectedClassId === cls.id && { color: '#fff' }]}>
+                                        {cls.name}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
 
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSaveTask}>
-                        <Text style={styles.saveButtonText}>AGENDAR</Text>
-                    </TouchableOpacity>
-                </View>
+                        <TouchableOpacity style={styles.saveButton} onPress={handleSaveTask}>
+                            <Text style={styles.saveButtonText}>AGENDAR</Text>
+                        </TouchableOpacity>
+                    </View>
+                </KeyboardAvoidingView>
             </Modal>
 
         </View>
@@ -316,7 +324,7 @@ const styles = StyleSheet.create({
 
     fab: { position: 'absolute', bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: '#6200ee', justifyContent: 'center', alignItems: 'center', elevation: 5 },
 
-    modalContent: { backgroundColor: '#fff', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 40 },
+    modalContent: { backgroundColor: '#fff', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
     modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#333' },
     modalSub: { fontSize: 14, color: '#666', marginBottom: 20 },
     input: { backgroundColor: '#f5f5f5', padding: 12, borderRadius: 8, marginBottom: 15, fontSize: 16 },

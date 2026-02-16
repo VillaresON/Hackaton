@@ -3,11 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Modal from 'react-native-modal'; // <--- O astro do show
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { database } from '../database';
 import { Q } from '@nozbe/watermelondb';
 import { saveGradesBatch, generateGradesReport, deleteGradesList } from '../services/GradeService';
 
 const GradesScreen = ({ route, navigation }) => {
+  const insets = useSafeAreaInsets();
   const { classId, className } = route.params;
   
   const [activeTab, setActiveTab] = useState('launch');
@@ -206,7 +208,7 @@ const GradesScreen = ({ route, navigation }) => {
             <FlatList
               data={students}
               keyExtractor={item => item.id}
-              contentContainerStyle={{ paddingBottom: 80 }}
+              contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
               renderItem={({ item }) => (
                 <View style={styles.studentRow}>
                   <Text style={styles.studentName}>{item.name}</Text>
@@ -223,7 +225,7 @@ const GradesScreen = ({ route, navigation }) => {
               )}
             />
 
-            <TouchableOpacity style={styles.fabSave} onPress={handleSave}>
+            <TouchableOpacity style={[styles.fabSave, { bottom: 20 + insets.bottom }]} onPress={handleSave}>
               <MaterialIcons name="save" size={28} color="#fff" />
               <Text style={styles.fabText}>SALVAR</Text>
             </TouchableOpacity>
@@ -272,29 +274,35 @@ const GradesScreen = ({ route, navigation }) => {
         backdropOpacity={0.5}
         avoidKeyboard
       >
-        <View style={styles.modalContainer}>
-          <View style={[styles.modalIconBox, { backgroundColor: modalStyle.color + '20' }]}>
-            <MaterialIcons name={modalStyle.icon} size={40} color={modalStyle.color} />
-          </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === 'android' ? insets.bottom + 60 : 0}
+        >
+          <View style={[styles.modalContainer, { paddingBottom: 25 + insets.bottom }]}>
+            <View style={[styles.modalIconBox, { backgroundColor: modalStyle.color + '20' }]}>
+              <MaterialIcons name={modalStyle.icon} size={40} color={modalStyle.color} />
+            </View>
 
-          <Text style={styles.modalTitle}>{modal.title}</Text>
-          <Text style={styles.modalMessage}>{modal.message}</Text>
+            <Text style={styles.modalTitle}>{modal.title}</Text>
+            <Text style={styles.modalMessage}>{modal.message}</Text>
 
-          <View style={styles.modalButtons}>
-            {modal.type === 'confirm' && (
-              <TouchableOpacity style={styles.modalCancelBtn} onPress={closeModal}>
-                <Text style={styles.modalCancelText}>Cancelar</Text>
+            <View style={styles.modalButtons}>
+              {modal.type === 'confirm' && (
+                <TouchableOpacity style={styles.modalCancelBtn} onPress={closeModal}>
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={[styles.modalConfirmBtn, { backgroundColor: modalStyle.color }]}
+                onPress={handleConfirmAction}
+              >
+                <Text style={styles.modalConfirmText}>{modalStyle.btnText}</Text>
               </TouchableOpacity>
-            )}
-
-            <TouchableOpacity 
-              style={[styles.modalConfirmBtn, { backgroundColor: modalStyle.color }]} 
-              onPress={handleConfirmAction}
-            >
-              <Text style={styles.modalConfirmText}>{modalStyle.btnText}</Text>
-            </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
     </KeyboardAvoidingView>
