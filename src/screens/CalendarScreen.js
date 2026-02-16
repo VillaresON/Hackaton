@@ -231,54 +231,56 @@ const CalendarScreen = () => {
                 isVisible={isModalVisible}
                 onBackdropPress={() => setModalVisible(false)}
                 style={{ justifyContent: 'flex-end', margin: 0 }}
-                avoidKeyboard
             >
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={{ flex: 1 }}
-                    keyboardVerticalOffset={Platform.OS === 'android' ? insets.bottom + 60 : 0}
-                >
-                    <View style={[styles.modalContent, { paddingBottom: 20 + insets.bottom }]}>
-                        <Text style={styles.modalTitle}>Nova Tarefa</Text>
-                        <Text style={styles.modalSub}>Para o dia {new Date(selectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</Text>
+                <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+                    <ScrollView
+                        contentContainerStyle={{ paddingBottom: 300 + insets.bottom }}
+                        keyboardShouldPersistTaps="handled"
+                        keyboardDismissMode="interactive"
+                        style={{ maxHeight: '90%' }}
+                    >
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Nova Tarefa</Text>
+                            <Text style={styles.modalSub}>Para o dia {new Date(selectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</Text>
 
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Título (Ex: Prova, Entrega de Trabalho)"
-                            placeholderTextColor="#999"
-                            value={newTaskTitle}
-                            onChangeText={setNewTaskTitle}
-                        />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Título (Ex: Prova, Entrega de Trabalho)"
+                                placeholderTextColor="#999"
+                                value={newTaskTitle}
+                                onChangeText={setNewTaskTitle}
+                            />
 
-                        <TextInput
-                            style={[styles.input, { height: 80 }]}
-                            placeholder="Descrição (Opcional)"
-                            placeholderTextColor="#999"
-                            multiline
-                            value={newTaskDesc}
-                            onChangeText={setNewTaskDesc}
-                        />
+                            <TextInput
+                                style={[styles.input, { height: 80 }]}
+                                placeholder="Descrição (Opcional)"
+                                placeholderTextColor="#999"
+                                multiline
+                                value={newTaskDesc}
+                                onChangeText={setNewTaskDesc}
+                            />
 
-                        <Text style={styles.label}>Para qual turma?</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-                            {classes.map(cls => (
-                                <TouchableOpacity
-                                    key={cls.id}
-                                    style={[styles.classChip, selectedClassId === cls.id && styles.classChipSelected]}
-                                    onPress={() => setSelectedClassId(cls.id)}
-                                >
-                                    <Text style={[styles.classChipText, selectedClassId === cls.id && { color: '#fff' }]}>
-                                        {cls.name}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
+                            <Text style={styles.label}>Para qual turma?</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+                                {classes.map(cls => (
+                                    <TouchableOpacity
+                                        key={cls.id}
+                                        style={[styles.classChip, selectedClassId === cls.id && styles.classChipSelected]}
+                                        onPress={() => setSelectedClassId(cls.id)}
+                                    >
+                                        <Text style={[styles.classChipText, selectedClassId === cls.id && { color: '#fff' }]}>
+                                            {cls.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
 
-                        <TouchableOpacity style={styles.saveButton} onPress={handleSaveTask}>
-                            <Text style={styles.saveButtonText}>AGENDAR</Text>
-                        </TouchableOpacity>
-                    </View>
-                </KeyboardAvoidingView>
+                            <TouchableOpacity style={styles.saveButton} onPress={handleSaveTask}>
+                                <Text style={styles.saveButtonText}>AGENDAR</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
+                </View>
             </Modal>
 
         </View>
