@@ -194,9 +194,10 @@ const GradesScreen = ({ route, navigation }) => {
           <>
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Nome da Avaliação:</Text>
-              <TextInput 
-                style={styles.descInput} 
-                placeholder="Ex: Prova 1º Bimestre" 
+              <TextInput
+                style={styles.descInput}
+                placeholder="Ex: Prova 1º Bimestre"
+                placeholderTextColor="#000"
                 value={description}
                 onChangeText={setDescription}
               />
@@ -209,9 +210,10 @@ const GradesScreen = ({ route, navigation }) => {
               renderItem={({ item }) => (
                 <View style={styles.studentRow}>
                   <Text style={styles.studentName}>{item.name}</Text>
-                  <TextInput 
+                  <TextInput
                     style={styles.gradeInput}
                     placeholder="-"
+                    placeholderTextColor="#000"
                     keyboardType="numeric"
                     maxLength={4}
                     value={gradesMap[item.id]}
@@ -268,6 +270,7 @@ const GradesScreen = ({ route, navigation }) => {
         animationIn="fadeInUp"
         animationOut="fadeOutDown"
         backdropOpacity={0.5}
+        avoidKeyboard
       >
         <View style={styles.modalContainer}>
           <View style={[styles.modalIconBox, { backgroundColor: modalStyle.color + '20' }]}>

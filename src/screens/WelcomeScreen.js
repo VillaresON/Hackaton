@@ -103,7 +103,7 @@ const WelcomeScreen = ({ navigation }) => {
                         <TextInput
                             style={styles.input}
                             placeholder="Ex: João Silva"
-                            placeholderTextColor="#ddd"
+                            placeholderTextColor="#000"
                             value={name}
                             onChangeText={setName}
                             autoFocus

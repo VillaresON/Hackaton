@@ -229,6 +229,7 @@ const CalendarScreen = () => {
                 isVisible={isModalVisible}
                 onBackdropPress={() => setModalVisible(false)}
                 style={{ justifyContent: 'flex-end', margin: 0 }}
+                avoidKeyboard
             >
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>Nova Tarefa</Text>
@@ -237,6 +238,7 @@ const CalendarScreen = () => {
                     <TextInput
                         style={styles.input}
                         placeholder="Título (Ex: Prova, Entrega de Trabalho)"
+                        placeholderTextColor="#000"
                         value={newTaskTitle}
                         onChangeText={setNewTaskTitle}
                     />
@@ -244,6 +246,7 @@ const CalendarScreen = () => {
                     <TextInput
                         style={[styles.input, { height: 80 }]}
                         placeholder="Descrição (Opcional)"
+                        placeholderTextColor="#000"
                         multiline
                         value={newTaskDesc}
                         onChangeText={setNewTaskDesc}
@@ -313,7 +316,7 @@ const styles = StyleSheet.create({
 
     fab: { position: 'absolute', bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: '#6200ee', justifyContent: 'center', alignItems: 'center', elevation: 5 },
 
-    modalContent: { backgroundColor: '#fff', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+    modalContent: { backgroundColor: '#fff', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 40 },
     modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#333' },
     modalSub: { fontSize: 14, color: '#666', marginBottom: 20 },
     input: { backgroundColor: '#f5f5f5', padding: 12, borderRadius: 8, marginBottom: 15, fontSize: 16 },

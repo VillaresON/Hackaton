@@ -7,6 +7,7 @@ import { Q } from '@nozbe/watermelondb';
 import { MaterialIcons } from '@expo/vector-icons';
 import { database } from '../database';
 import StudentItem from '../components/StudentItem';
+import { generateAttendanceReport } from '../services/AttendanceReportService';
 
 const ClassScreen = ({ students, navigation, route }) => {
 
@@ -19,6 +20,10 @@ const ClassScreen = ({ students, navigation, route }) => {
       classId: route.params.classId,
       className: route.params.className
     });
+  };
+
+  const handlePrintReport = async () => {
+    await generateAttendanceReport(route.params.classId);
   };
 
   return (
@@ -48,6 +53,11 @@ const ClassScreen = ({ students, navigation, route }) => {
 
       {/* --- BOTÕES DE AÇÕES (NOVOS) --- */}
       <View style={styles.actionButtonsContainer}>
+        <TouchableOpacity style={styles.printButton} onPress={handlePrintReport}>
+          <MaterialIcons name="print" size={24} color="#fff" />
+          <Text style={styles.printButtonText}>IMPRIMIR RELATÓRIO</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.gradeButton} onPress={handleOpenGrades}>
           <MaterialIcons name="assignment-turned-in" size={24} color="#fff" />
           <Text style={styles.gradeButtonText}>LANÇAR NOTAS</Text>
@@ -113,12 +123,32 @@ const styles = StyleSheet.create({
   legendRowSecondary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 5 },
   legendSubText: { fontSize: 12, color: '#666', fontStyle: 'italic' },
 
+  // Estilo do Botão de Imprimir
+  printButton: {
+    flexDirection: 'row',
+    backgroundColor: '#6200ee', // Roxo
+    marginHorizontal: 15,
+    marginTop: 10,
+    marginBottom: 5,
+    padding: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3
+  },
+  printButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    fontSize: 14
+  },
+
   // Estilo do Botão de Notas
   gradeButton: {
     flexDirection: 'row',
     backgroundColor: '#FF9800', // Laranja
     marginHorizontal: 15,
-    marginTop: 10,
+    marginTop: 5,
     marginBottom: 5,
     padding: 12,
     borderRadius: 8,

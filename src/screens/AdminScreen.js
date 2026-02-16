@@ -234,8 +234,8 @@ const AdminScreen = () => {
             <Text style={styles.headerTitle}>Gerenciar Turmas</Text>
             <View style={styles.formCard}>
               <Text style={styles.cardTitle}>Nova Turma</Text>
-              <TextInput style={styles.input} placeholder="Nome (Ex: Matemática)" value={className} onChangeText={setClassName} />
-              <TextInput style={styles.input} placeholder="Série (Ex: 3º Ano B)" value={classGrade} onChangeText={setClassGrade} />
+              <TextInput style={styles.input} placeholder="Nome (Ex: Matemática)" placeholderTextColor="#000" value={className} onChangeText={setClassName} />
+              <TextInput style={styles.input} placeholder="Série (Ex: 3º Ano B)" placeholderTextColor="#000" value={classGrade} onChangeText={setClassGrade} />
               <TouchableOpacity style={styles.miniButton} onPress={handleCreateClass}>
                 <Text style={styles.miniButtonText}>+ Adicionar</Text>
               </TouchableOpacity>
@@ -266,8 +266,8 @@ const AdminScreen = () => {
               <>
                 <View style={styles.formCard}>
                   <Text style={styles.cardTitle}>Novo Aluno</Text>
-                  <TextInput style={styles.input} placeholder="Nome Completo" value={studentName} onChangeText={setStudentName} />
-                  <TextInput style={styles.input} placeholder="(DDD) 9XXXX-XXXX" keyboardType="numeric" value={parentPhone} onChangeText={handlePhoneChange} maxLength={15} />
+                  <TextInput style={styles.input} placeholder="Nome Completo" placeholderTextColor="#000" value={studentName} onChangeText={setStudentName} />
+                  <TextInput style={styles.input} placeholder="(DDD) 9XXXX-XXXX" placeholderTextColor="#000" keyboardType="numeric" value={parentPhone} onChangeText={handlePhoneChange} maxLength={15} />
                   <TouchableOpacity style={styles.miniButton} onPress={handleCreateStudent}>
                     <Text style={styles.miniButtonText}>+ Matricular</Text>
                   </TouchableOpacity>
@@ -303,6 +303,7 @@ const AdminScreen = () => {
         onBackdropPress={() => setClassModalVisible(false)}
         onBackButtonPress={() => setClassModalVisible(false)}
         style={styles.modal}
+        avoidKeyboard
       >
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
   reportTitle: { fontWeight: 'bold', fontSize: 16, color: '#333' },
   reportSubtitle: { color: '#666' },
   modal: { justifyContent: 'flex-end', margin: 0 },
-  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '60%' },
+  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '55%', paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 10 },
   modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
   modalItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
